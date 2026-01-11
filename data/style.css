@@ -1,0 +1,71 @@
+.content-view {
+    background-color: @window_bg_color;
+}
+
+.navigation-sidebar {
+    background-color: transparent;
+}
+
+.navigation-sidebar row {
+    border-radius: 6px;
+    margin: 2px 6px;
+}
+
+.navigation-sidebar row:selected {
+    background-color: alpha(@accent_bg_color, 0.15);
+}
+
+.navigation-sidebar row:hover:not(:selected) {
+    background-color: alpha(currentColor, 0.07);
+}
+
+.path-bar-button {
+    min-height: 28px;
+    padding: 0 8px;
+    border-radius: 6px;
+}
+
+.statusbar {
+    background-color: @headerbar_bg_color;
+    padding: 4px 12px;
+    font-size: 0.9em;
+}
+
+gridview > child {
+    border-radius: 8px;
+    padding: 8px;
+    transition: background-color 200ms ease;
+}
+
+gridview > child:hover {
+    background-color: alpha(currentColor, 0.07);
+}
+
+gridview > child:selected {
+    background-color: alpha(@accent_bg_color, 0.2);
+}
+
+columnview > listview > row {
+    border-radius: 0;
+    padding: 2px 0;
+}
+
+columnview > listview > row:hover {
+    background-color: alpha(currentColor, 0.07);
+}
+
+columnview > listview > row:selected {
+    background-color: alpha(@accent_bg_color, 0.2);
+}
+
+.toolbar {
+    background-color: @headerbar_bg_color;
+    border-top: 1px solid alpha(currentColor, 0.1);
+}
+
+.heading {
+    font-weight: bold;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}

@@ -1,0 +1,5 @@
+# Hiding build directory
+build
+
+# Hiding cache
+.cache
