@@ -52,7 +52,7 @@ static void file_item_finalize(GObject *object) {
   g_free(self->modified);
   G_OBJECT_CLASS(file_item_parent_class)->finalize(object);
 }
-Utility utly;
+Utility utly{};
 static void file_item_class_init(FileItemObjectClass *klass) {
   GObjectClass *object_class = G_OBJECT_CLASS(klass);
   object_class->finalize = file_item_finalize;
@@ -142,6 +142,33 @@ void ContentView::setup_path_bar() {
   gtk_box_append(content_box_, separator);
 }
 
+void ContentView::on_item_activated(GtkGridView *view, guint position,
+                                    gpointer user_data) {
+  (void)view;
+  auto *self = static_cast<ContentView *>(user_data);
+  auto *item = FILE_ITEM(
+      g_list_model_get_item(G_LIST_MODEL(self->file_store_), position));
+
+  if (!item)
+    return;
+
+  std::string cur_dir = utly.getCurDir();
+  if (cur_dir.empty() || cur_dir.back() != '/') {
+    cur_dir += '/';
+  }
+
+  if (item->is_directory) {
+    std::string new_path = cur_dir + item->name + "/";
+    utly.setCurDir(new_path.c_str());
+    self->reload_items();
+  } else {
+    std::string full_path = cur_dir + item->name;
+    GFile *file = g_file_new_for_path(full_path.c_str());
+    g_app_info_launch_default_for_uri(g_file_get_uri(file), NULL, NULL);
+    g_object_unref(file);
+  }
+}
+
 void ContentView::setup_grid_view() {
   auto *factory = gtk_signal_list_item_factory_new();
 
@@ -197,6 +224,8 @@ void ContentView::setup_grid_view() {
   gtk_grid_view_set_min_columns(grid_view_, 3);
   gtk_grid_view_set_max_columns(grid_view_, 10);
   gtk_widget_add_css_class(GTK_WIDGET(grid_view_), "content-view");
+
+  g_signal_connect(grid_view_, "activate", G_CALLBACK(on_item_activated), this);
 }
 
 void ContentView::setup_list_view() {
@@ -242,7 +271,7 @@ void ContentView::setup_list_view() {
                      gtk_label_set_text(GTK_LABEL(label), item->name);
                    }),
                    nullptr);
-
+  g_signal_connect(list_view_, "activate", G_CALLBACK(on_item_activated), this);
   auto *name_col = gtk_column_view_column_new("Name", name_factory);
   gtk_column_view_column_set_expand(name_col, TRUE);
   gtk_column_view_column_set_resizable(name_col, TRUE);
@@ -322,7 +351,18 @@ void ContentView::setup_list_view() {
 }
 
 void ContentView::add_sample_items() {
-  const auto sc = utly.scan_folder(utly.getHome());
+  const auto sc = utly.scan_folder(utly.getCurDir());
+
+  for (auto &s : sc) {
+    g_list_store_append(file_store_,
+                        file_item_new(s.c_str(), "folder-symbolic", "Folder",
+                                      "--", "Today", TRUE));
+  }
+}
+
+void ContentView::reload_items() {
+  g_list_store_remove_all(file_store_);
+  const auto sc = utly.scan_folder(utly.getCurDir());
 
   for (auto &s : sc) {
     g_list_store_append(file_store_,

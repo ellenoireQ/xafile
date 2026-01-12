@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "glib.h"
 #include <adwaita.h>
 #include <gtk/gtk.h>
 
@@ -37,7 +38,9 @@ private:
   void setup_grid_view();
   void setup_list_view();
   void add_sample_items();
-
+  void reload_items();
+  static void on_item_activated(GtkGridView *view, guint position,
+                                gpointer user_data);
   static void on_item_right_click(GtkGestureClick *gesture, int n_press,
                                   double x, double y, gpointer user_data);
   static void setup_item_factory(GtkSignalListItemFactory *factory,

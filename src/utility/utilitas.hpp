@@ -27,13 +27,16 @@
 class Utility {
 private:
   inline static const char *homedir{};
+  inline static const char *curDir{};
 
 public:
   static auto getHome() {
-    if ((homedir = getenv("HOME")) == NULL) {
+    if ((homedir = getenv("HOME")) == NULL ||
+        (curDir == getenv("HOME") == NULL)) {
       homedir = getpwuid(getuid())->pw_dir;
+      curDir = homedir;
     }
-    return homedir;
+    return curDir;
   }
 
   static auto getHomePath() {
@@ -58,5 +61,12 @@ public:
       }
     }
     return result;
+  }
+
+  auto setCurDir(const char *path) { return curDir = path; }
+  auto getCurDir() {
+    if (curDir == nullptr)
+      getHome();
+    return curDir;
   }
 };
