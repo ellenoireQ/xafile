@@ -16,12 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdlib>
 #include <filesystem>
+#include <iostream>
 #include <pwd.h>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <unistd.h>
 #include <vector>
 
@@ -53,14 +56,30 @@ public:
     return result;
   }
 
-  std::vector<std::string> scan_folder(const std::string &path) {
-    std::vector<std::string> result;
-    for (const auto &entry : std::filesystem::directory_iterator(path)) {
-      if (entry.is_directory()) {
-        result.push_back(entry.path().filename().string());
+  std::tuple<std::vector<std::string>, std::vector<std::string>>
+  scan(const std::string &path) {
+    namespace fs = std::filesystem;
+
+    std::vector<std::string> dirs;
+    std::vector<std::string> files;
+
+    try {
+      for (const auto &entry : fs::directory_iterator(path)) {
+        auto name = entry.path().filename().string();
+
+        if (entry.is_directory())
+          dirs.push_back(name);
+        else if (entry.is_regular_file())
+          files.push_back(name);
       }
+    } catch (const fs::filesystem_error &e) {
+      std::cerr << e.what() << '\n';
     }
-    return result;
+
+    std::sort(dirs.begin(), dirs.end());
+    std::sort(files.begin(), files.end());
+
+    return {dirs, files};
   }
 
   auto setCurDir(const char *path) { return curDir = std::string(path); }

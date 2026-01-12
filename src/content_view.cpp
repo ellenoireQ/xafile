@@ -19,6 +19,7 @@
 #include "content_view.hpp"
 #include "gio/gio.h"
 #include "glib.h"
+#include "glibconfig.h"
 #include "utility/utilitas.hpp"
 #include <cstddef>
 #include <cstdlib>
@@ -353,24 +354,34 @@ void ContentView::setup_list_view() {
 }
 
 void ContentView::add_sample_items() {
-  const auto sc = utly.scan_folder(utly.getCurDir());
+  const auto [sc, s] = utly.scan(utly.getCurDir());
 
   for (auto &s : sc) {
     g_list_store_append(file_store_,
                         file_item_new(s.c_str(), "folder-symbolic", "Folder",
                                       "--", "Today", TRUE));
   }
+  for (auto &c : s) {
+    g_list_store_append(file_store_,
+                        file_item_new(c.c_str(), "text-x-generic", "file", "--",
+                                      "today", false));
+  }
 }
 
 void ContentView::reload_items() {
   g_list_store_remove_all(file_store_);
-  const auto sc = utly.scan_folder(utly.getCurDir());
+  const auto [sc, s] = utly.scan(utly.getCurDir());
 
   for (auto &s : sc) {
     std::cout << s << std::endl;
     g_list_store_append(file_store_,
                         file_item_new(s.c_str(), "folder-symbolic", "Folder",
                                       "--", "Today", TRUE));
+  }
+  for (auto &c : s) {
+    g_list_store_append(file_store_,
+                        file_item_new(c.c_str(), "text-x-generic", "file", "--",
+                                      "today", false));
   }
 }
 
