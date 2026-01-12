@@ -39,6 +39,7 @@ private:
   void setup_list_view();
   void add_sample_items();
   void reload_items();
+  void refresh_path_bar();
   static void on_item_activated(GtkGridView *view, guint position,
                                 gpointer user_data);
   static void on_item_right_click(GtkGestureClick *gesture, int n_press,

@@ -118,9 +118,8 @@ ContentView::ContentView() : is_grid_mode_(true) {
 }
 
 ContentView *ContentView::create() { return new ContentView(); }
-
 void ContentView::setup_path_bar() {
-  const auto result = utly.getHomePath();
+  const auto result = utly.getParsedCurDir();
   path_bar_ = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
   gtk_widget_add_css_class(GTK_WIDGET(path_bar_), "linked");
   gtk_widget_set_margin_start(GTK_WIDGET(path_bar_), 12);
@@ -137,11 +136,31 @@ void ContentView::setup_path_bar() {
     gtk_widget_add_css_class(breadcrumbs, "flat");
     gtk_box_append(path_bar_, breadcrumbs);
   }
-
   gtk_box_append(content_box_, GTK_WIDGET(path_bar_));
 
   auto *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
   gtk_box_append(content_box_, separator);
+}
+
+void ContentView::refresh_path_bar() {
+  GtkWidget *child = gtk_widget_get_first_child(GTK_WIDGET(path_bar_));
+  while (child != nullptr) {
+    GtkWidget *next = gtk_widget_get_next_sibling(child);
+    gtk_box_remove(path_bar_, child);
+    child = next;
+  }
+
+  const auto result = utly.getParsedCurDir();
+  for (size_t i = 0; i < result.size(); i++) {
+    if (i > 0) {
+      auto *arrowRight = gtk_image_new_from_icon_name("go-next-symbolic");
+      gtk_widget_set_opacity(arrowRight, 0.5);
+      gtk_box_append(path_bar_, arrowRight);
+    }
+    auto *breadcrumbs = gtk_button_new_with_label(result[i].c_str());
+    gtk_widget_add_css_class(breadcrumbs, "flat");
+    gtk_box_append(path_bar_, breadcrumbs);
+  }
 }
 
 void ContentView::on_item_activated(GtkGridView *view, guint position,
@@ -383,6 +402,8 @@ void ContentView::reload_items() {
                         file_item_new(c.c_str(), "text-x-generic", "file", "--",
                                       "today", false));
   }
+
+  refresh_path_bar();
 }
 
 void ContentView::set_view_mode(bool grid_mode) {

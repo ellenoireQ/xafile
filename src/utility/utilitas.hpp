@@ -42,9 +42,10 @@ public:
     return homedir;
   }
 
-  static auto getHomePath() {
-    std::string path = getHome();
-    std::stringstream ss(path);
+  static auto getParsedCurDir() {
+    if (curDir.empty())
+      curDir = getHome();
+    std::stringstream ss(curDir);
     std::string segment;
     std::vector<std::string> result;
 
