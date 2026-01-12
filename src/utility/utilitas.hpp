@@ -63,9 +63,5 @@ public:
   }
 
   auto setCurDir(const char *path) { return curDir = path; }
-  auto getCurDir() {
-    if (curDir == nullptr)
-      getHome();
-    return curDir;
-  }
+  auto getCurDir() { return curDir; }
 };
