@@ -30,8 +30,8 @@
 
 class Utility {
 private:
-  inline static const char *homedir{};
-  inline static std::string curDir{};
+  inline static std::filesystem::path homedir{};
+  inline static std::filesystem::path curDir{};
 
 public:
   static auto getHome() {
@@ -56,15 +56,14 @@ public:
     return result;
   }
 
-  std::tuple<std::vector<std::string>, std::vector<std::string>>
+  std::tuple<std::vector<std::filesystem::path>,
+             std::vector<std::filesystem::path>>
   scan(const std::string &path) {
-    namespace fs = std::filesystem;
-
-    std::vector<std::string> dirs;
-    std::vector<std::string> files;
+    std::vector<std::filesystem::path> dirs;
+    std::vector<std::filesystem::path> files;
 
     try {
-      for (const auto &entry : fs::directory_iterator(path)) {
+      for (const auto &entry : std::filesystem::directory_iterator(path)) {
         auto name = entry.path().filename().string();
 
         if (entry.is_directory())
@@ -72,7 +71,7 @@ public:
         else if (entry.is_regular_file())
           files.push_back(name);
       }
-    } catch (const fs::filesystem_error &e) {
+    } catch (const std::filesystem::filesystem_error &e) {
       std::cerr << e.what() << '\n';
     }
 
@@ -82,6 +81,6 @@ public:
     return {dirs, files};
   }
 
-  auto setCurDir(const char *path) { return curDir = std::string(path); }
+  auto setCurDir(std::filesystem::path path) { return curDir = path; }
   auto getCurDir() { return curDir; }
 };
