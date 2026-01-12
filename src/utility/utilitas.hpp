@@ -31,12 +31,11 @@ private:
 
 public:
   static auto getHome() {
-    if ((homedir = getenv("HOME")) == NULL ||
-        (curDir == getenv("HOME") == NULL)) {
-      homedir = getpwuid(getuid())->pw_dir;
+    homedir = getpwuid(getuid())->pw_dir;
+    // Avoid null while launching app
+    if (curDir == nullptr)
       curDir = homedir;
-    }
-    return curDir;
+    return homedir;
   }
 
   static auto getHomePath() {
