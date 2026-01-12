@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cstddef>
 #include <cstdlib>
 #include <filesystem>
 #include <pwd.h>
@@ -27,14 +28,14 @@
 class Utility {
 private:
   inline static const char *homedir{};
-  inline static const char *curDir{};
+  inline static std::string curDir{};
 
 public:
   static auto getHome() {
     homedir = getpwuid(getuid())->pw_dir;
     // Avoid null while launching app
-    if (curDir == nullptr)
-      curDir = homedir;
+    if (curDir == "")
+      curDir = std::string(homedir);
     return homedir;
   }
 
@@ -62,6 +63,6 @@ public:
     return result;
   }
 
-  auto setCurDir(const char *path) { return curDir = path; }
+  auto setCurDir(const char *path) { return curDir = std::string(path); }
   auto getCurDir() { return curDir; }
 };

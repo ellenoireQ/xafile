@@ -22,6 +22,7 @@
 #include "utility/utilitas.hpp"
 #include <cstddef>
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -145,6 +146,7 @@ void ContentView::setup_path_bar() {
 void ContentView::on_item_activated(GtkGridView *view, guint position,
                                     gpointer user_data) {
   (void)view;
+  namespace fs = std::filesystem;
   auto *self = static_cast<ContentView *>(user_data);
   auto *item = FILE_ITEM(
       g_list_model_get_item(G_LIST_MODEL(self->file_store_), position));
@@ -158,7 +160,7 @@ void ContentView::on_item_activated(GtkGridView *view, guint position,
   }
 
   if (item->is_directory) {
-    std::string new_path = cur_dir + item->name + "/";
+    fs::path new_path = cur_dir + item->name + '/';
     utly.setCurDir(new_path.c_str());
     self->reload_items();
   } else {
@@ -365,6 +367,7 @@ void ContentView::reload_items() {
   const auto sc = utly.scan_folder(utly.getCurDir());
 
   for (auto &s : sc) {
+    std::cout << s << std::endl;
     g_list_store_append(file_store_,
                         file_item_new(s.c_str(), "folder-symbolic", "Folder",
                                       "--", "Today", TRUE));
