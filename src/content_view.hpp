@@ -26,6 +26,8 @@ namespace xafile {
 
 class ContentView {
 public:
+  void reload_items();
+
   static ContentView *create();
   GtkWidget *get_widget() const { return GTK_WIDGET(content_box_); }
 
@@ -38,7 +40,6 @@ private:
   void setup_grid_view();
   void setup_list_view();
   void add_sample_items();
-  void reload_items();
   void refresh_path_bar();
   static void on_item_activated(GtkGridView *view, guint position,
                                 gpointer user_data);

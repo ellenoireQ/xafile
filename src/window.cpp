@@ -140,6 +140,7 @@ void Window::setup_content() {
   adw_navigation_split_view_set_sidebar(split_view_, sidebar_page);
 
   content_view_ = ContentView::create();
+  sidebar_->set_content_view(content_view_);
   auto *content_page =
       adw_navigation_page_new(content_view_->get_widget(), "Files");
   adw_navigation_split_view_set_content(split_view_, content_page);

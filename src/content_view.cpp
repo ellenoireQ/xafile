@@ -54,7 +54,7 @@ static void file_item_finalize(GObject *object) {
   g_free(self->modified);
   G_OBJECT_CLASS(file_item_parent_class)->finalize(object);
 }
-Utility utly{};
+static Utility utly{};
 static void file_item_class_init(FileItemObjectClass *klass) {
   GObjectClass *object_class = G_OBJECT_CLASS(klass);
   object_class->finalize = file_item_finalize;

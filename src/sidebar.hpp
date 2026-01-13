@@ -23,10 +23,13 @@
 
 namespace xafile {
 
+class ContentView;  // forward declaration
+
 class Sidebar {
 public:
     static Sidebar* create();
     GtkWidget* get_widget() const { return GTK_WIDGET(scrolled_window_); }
+    void set_content_view(ContentView* view) { content_view_ = view; }
 
 private:
     Sidebar();
@@ -42,6 +45,7 @@ private:
     GtkListBox* places_list_;
     GtkListBox* devices_list_;
     GtkListBox* bookmarks_list_;
+    ContentView* content_view_ = nullptr;
 };
 
 } // namespace xafile
