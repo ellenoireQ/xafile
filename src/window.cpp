@@ -18,6 +18,7 @@
 
 #include "window.hpp"
 #include "content_view.hpp"
+#include "gtk/gtkshortcut.h"
 #include "sidebar.hpp"
 
 namespace xafile {
@@ -33,6 +34,7 @@ Window::Window(GtkApplication *app) {
 }
 
 Window *Window::create(GtkApplication *app) { return new Window(app); }
+
 
 void Window::setup_headerbar() {
   headerbar_ = ADW_HEADER_BAR(adw_header_bar_new());
@@ -113,6 +115,11 @@ void Window::setup_headerbar() {
   g_object_unref(menu);
 }
 
+Window *Window::reload() {
+  if (content_view_)
+    content_view_->reload_items();
+  return this;
+}
 void Window::setup_content() {
   auto *main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
@@ -140,6 +147,10 @@ void Window::setup_content() {
   adw_navigation_split_view_set_sidebar(split_view_, sidebar_page);
 
   content_view_ = ContentView::create();
+  content_view_->set_on_history_changed(
+      [this](bool can_back, bool can_forward) {
+        update_nav_buttons(can_back, can_forward);
+      });
   sidebar_->set_content_view(content_view_);
   auto *content_page =
       adw_navigation_page_new(content_view_->get_widget(), "Files");
@@ -191,12 +202,23 @@ void Window::setup_actions() {
 
 void Window::on_back_clicked(GtkButton *button, gpointer user_data) {
   (void)button;
-  (void)user_data;
+  auto *self = static_cast<Window *>(user_data);
+  if (self->content_view_) {
+    self->content_view_->go_back();
+  }
 }
 
 void Window::on_forward_clicked(GtkButton *button, gpointer user_data) {
   (void)button;
-  (void)user_data;
+  auto *self = static_cast<Window *>(user_data);
+  if (self->content_view_) {
+    self->content_view_->go_forward();
+  }
+}
+
+void Window::update_nav_buttons(bool can_back, bool can_forward) {
+  gtk_widget_set_sensitive(back_btn_, can_back);
+  gtk_widget_set_sensitive(forward_btn_, can_forward);
 }
 
 void Window::on_search_toggled(GtkToggleButton *button, gpointer user_data) {
@@ -206,8 +228,10 @@ void Window::on_search_toggled(GtkToggleButton *button, gpointer user_data) {
 }
 
 void Window::on_view_mode_changed(GtkToggleButton *button, gpointer user_data) {
-  (void)button;
-  (void)user_data;
+  auto *self = static_cast<Window *>(user_data);
+  if (self->content_view_) {
+    self->content_view_->set_view_mode(gtk_toggle_button_get_active(button));
+  }
 }
 
 } // namespace xafile

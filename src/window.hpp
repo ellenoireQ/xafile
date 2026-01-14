@@ -30,6 +30,7 @@ class Window {
 public:
   static Window *create(GtkApplication *app);
   GtkWidget *get_widget() const { return GTK_WIDGET(window_); }
+  Window *reload();
 
 private:
   Window(GtkApplication *app);
@@ -37,6 +38,8 @@ private:
   void setup_headerbar();
   void setup_content();
   void setup_actions();
+
+  void update_nav_buttons(bool can_back, bool can_forward);
 
   static void on_back_clicked(GtkButton *button, gpointer user_data);
   static void on_forward_clicked(GtkButton *button, gpointer user_data);

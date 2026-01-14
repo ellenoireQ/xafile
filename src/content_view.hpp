@@ -21,6 +21,9 @@
 #include "glib.h"
 #include <adwaita.h>
 #include <gtk/gtk.h>
+#include <vector>
+#include <string>
+#include <functional>
 
 namespace xafile {
 
@@ -58,6 +61,19 @@ private:
   GListStore *file_store_;
 
   bool is_grid_mode_;
+  std::vector<std::string> back_stack_;
+  std::vector<std::string> forward_stack_;
+  std::function<void(bool, bool)> on_history_changed_;
+
+public:
+  void go_back();
+  void go_forward();
+  void set_on_history_changed(std::function<void(bool, bool)> callback) {
+    on_history_changed_ = callback;
+  }
+private:
+  void update_history_state();
+  void navigate(const std::string& path);
 };
 
 struct FileItem {

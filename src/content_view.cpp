@@ -20,6 +20,7 @@
 #include "gio/gio.h"
 #include "glib.h"
 #include "glibconfig.h"
+#include "src/window.hpp"
 #include "utility/utilitas.hpp"
 #include <cstddef>
 #include <cstdlib>
@@ -168,6 +169,7 @@ void ContentView::on_item_activated(GtkGridView *view, guint position,
   (void)view;
   namespace fs = std::filesystem;
   auto *self = static_cast<ContentView *>(user_data);
+
   auto *item = FILE_ITEM(
       g_list_model_get_item(G_LIST_MODEL(self->file_store_), position));
 
@@ -181,8 +183,7 @@ void ContentView::on_item_activated(GtkGridView *view, guint position,
 
   if (item->is_directory) {
     fs::path new_path = cur_dir + item->name + '/';
-    utly.setCurDir(new_path.c_str());
-    self->reload_items();
+    self->navigate(new_path.string());
   } else {
     std::string full_path = cur_dir + item->name;
     GFile *file = g_file_new_for_path(full_path.c_str());
@@ -392,7 +393,6 @@ void ContentView::reload_items() {
   const auto [sc, s] = utly.scan(utly.getCurDir());
 
   for (auto &s : sc) {
-    std::cout << s << std::endl;
     g_list_store_append(file_store_,
                         file_item_new(s.c_str(), "folder-symbolic", "Folder",
                                       "--", "Today", TRUE));
@@ -418,6 +418,49 @@ void ContentView::on_item_right_click(GtkGestureClick *gesture, int n_press,
   (void)x;
   (void)y;
   (void)user_data;
+}
+
+
+
+void ContentView::go_back() {
+  if (back_stack_.empty()) return;
+  
+  std::string target = back_stack_.back();
+  back_stack_.pop_back();
+  
+  forward_stack_.push_back(utly.getCurDir());
+  
+  utly.setCurDir(target);
+  reload_items();
+  update_history_state();
+}
+
+void ContentView::go_forward() {
+  if (forward_stack_.empty()) return;
+  
+  std::string target = forward_stack_.back();
+  forward_stack_.pop_back();
+  
+  back_stack_.push_back(utly.getCurDir());
+  
+  utly.setCurDir(target);
+  reload_items();
+  update_history_state();
+}
+
+void ContentView::update_history_state() {
+  if (on_history_changed_) {
+    on_history_changed_(!back_stack_.empty(), !forward_stack_.empty());
+  }
+}
+
+void ContentView::navigate(const std::string& path) {
+  back_stack_.push_back(utly.getCurDir());
+  forward_stack_.clear();
+  
+  utly.setCurDir(path);
+  reload_items();
+  update_history_state();
 }
 
 } // namespace xafile
